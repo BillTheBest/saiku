@@ -4,16 +4,25 @@
 	| implementation.
 	+-->
 
-<beans xmlns="http://www.springframework.org/schema/beans" 
-     xmlns:security="http://www.springframework.org/schema/security"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
-              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
-              http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd
-			   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
-			   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:security="http://www.springframework.org/schema/security"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd
+       		   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<context:property-placeholder
+			location="/WEB-INF/applicationContext-security-ldap.properties"
+			ignore-resource-not-found="true"
+			ignore-unresolvable="true"
+			order ="0" />
+
+	<context:property-placeholder
+			location="file:///${ext.prop.dir}applicationContext-security-ldap.properties"
+			ignore-resource-not-found="true"
+			ignore-unresolvable="true"
+			order ="-1" />
+
 
 	<security:authentication-manager alias="authenticationManager">
 		<security:authentication-provider ref="authenticationProvider" />
@@ -25,19 +34,19 @@
       <ref bean="authenticator" />
 		</constructor-arg>
 		<constructor-arg>
-			<ref local="populator" />
+			<ref bean="populator" />
 		</constructor-arg>
 	</bean>
 
   <bean id="authenticator" class="org.springframework.security.ldap.authentication.PasswordComparisonAuthenticator">
     <constructor-arg>
-      <ref local="contextSource" />
+      <ref bean="contextSource" />
     </constructor-arg>
     <property name="passwordEncoder">
-      <ref local="passwordEncoder" />
+      <ref bean="passwordEncoder" />
     </property>
     <property name="userSearch">
-      <ref local="userSearch" />
+      <ref bean="userSearch" />
     </property>
   </bean>
 
@@ -53,7 +62,7 @@
 		<constructor-arg index="0" value="${userSearch.searchBase}" />
 		<constructor-arg index="1" value="${userSearch.searchFilter}" />
 		<constructor-arg index="2">
-			<ref local="contextSource" />
+			<ref bean="contextSource" />
 		</constructor-arg>
 	</bean>
 
@@ -61,7 +70,7 @@
 	<bean id="populator"
 		class="org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator">
 		<constructor-arg index="0">
-			<ref local="contextSource" />
+			<ref bean="contextSource" />
 		</constructor-arg>
 		<constructor-arg index="1" value="${populator.groupSearchBase}" />
 		<property name="groupRoleAttribute" value="${populator.groupRoleAttribute}" />
@@ -75,10 +84,10 @@
 	<bean id="userDetailsService"
 		class="org.springframework.security.ldap.userdetails.LdapUserDetailsService">
 		<constructor-arg>
-			<ref local="userSearch" />
+			<ref bean="userSearch" />
 		</constructor-arg>
 		<constructor-arg>
-			<ref local="populator" />
+			<ref bean="populator" />
 		</constructor-arg>
 	</bean>
 
@@ -91,9 +100,6 @@
     class="org.springframework.security.authentication.encoding.PlaintextPasswordEncoder" >
   </bean>
 
-  <bean id="propertyPlaceholderConfigurerSecurityLdap" 
-    class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="location" value="/WEB-INF/applicationContext-security-ldap.properties" />
-  </bean>
+
 
 </beans>
